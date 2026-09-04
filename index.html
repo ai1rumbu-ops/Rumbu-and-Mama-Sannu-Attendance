@@ -333,7 +333,9 @@
   <div class="footer-note">Rumbu Industries Group &mdash; internal tool</div>
 </main>
 
-<script src="config.js"></script>
+<script>
+  var API_URL = "https://script.google.com/macros/s/AKfycbzlnoC9hBlfisWY7RZrf_c0g37W3ePUzP1g8YlKoa7XS7FZ_TNMiCj-SSlDwRAxqL8VAw/exec";
+</script>
 <script>
   // -------------------------------------------------------------
   // API helpers
@@ -420,14 +422,15 @@
       var shifts = [];
       matches.forEach(function (m) { m.shifts.forEach(function (s) { if (shifts.indexOf(s) === -1) shifts.push(s); }); });
       fill(shiftSel, shifts);
-      if (cfg.onChange) cfg.onChange();
     }
 
-    factorySel.addEventListener('change', refreshDept);
-    deptSel.addEventListener('change', refreshGroup);
-    groupSel.addEventListener('change', refreshUnit);
-    unitSel.addEventListener('change', refreshShift);
-    shiftSel.addEventListener('change', function () { if (cfg.onChange) cfg.onChange(); });
+    function fireOnChange() { if (cfg.onChange) cfg.onChange(); }
+
+    factorySel.addEventListener('change', function () { refreshDept(); fireOnChange(); });
+    deptSel.addEventListener('change', function () { refreshGroup(); fireOnChange(); });
+    groupSel.addEventListener('change', function () { refreshUnit(); fireOnChange(); });
+    unitSel.addEventListener('change', function () { refreshShift(); fireOnChange(); });
+    shiftSel.addEventListener('change', fireOnChange);
 
     fill(factorySel, uniq(ORG_UNITS.map(function (u) { return u.factory; })));
     refreshDept();
@@ -705,7 +708,7 @@
   function init() {
     if (!API_URL || API_URL.indexOf('PASTE_YOUR') !== -1) {
       document.getElementById('attLoading').innerHTML =
-        '<strong style="color:#C0392B;">Setup needed:</strong> open config.js and paste your deployed Apps Script Web App URL into API_URL.';
+        '<strong style="color:#C0392B;">Setup needed:</strong> paste your deployed Apps Script Web App URL into the API_URL variable near the bottom of index.html.';
       return;
     }
 
@@ -747,7 +750,7 @@
     }).catch(function (err) {
       document.getElementById('attLoading').innerHTML =
         '<strong style="color:#C0392B;">Failed to reach the API:</strong><br>' + err.message +
-        '<br><br><span style="font-size:11px;">Check that API_URL in config.js is correct and the backend is deployed with "Anyone" access.</span>';
+        '<br><br><span style="font-size:11px;">Check that API_URL in index.html is correct and the backend is deployed with "Anyone" access.</span>';
     });
   }
 
