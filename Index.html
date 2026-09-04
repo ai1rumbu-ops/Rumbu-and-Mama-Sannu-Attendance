@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rumbu Industries Group — Staff Attendance</title>
+<style>
+  :root {
+    --navy: #1F3864;
+    --blue: #2E75B6;
+    --bg: #F4F6F9;
+    --card: #FFFFFF;
+    --text: #1F2937;
+    --muted: #6B7280;
+    --green: #2E7D32;
+    --amber: #B7791F;
+    --red: #C0392B;
+    --border: #E2E8F0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+  }
+
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header .brand { font-size: 11px; letter-spacing: 0.6px; color: #C9D6E8; text-transform: uppercase; }
+  header .headline { font-size: 18px; font-weight: bold; margin-top: 2px; }
+  header .quick-nav button {
+    background: rgba(255,255,255,0.14);
+    color: #fff; border: none; padding: 8px 14px; border-radius: 6px;
+    font-size: 12px; cursor: pointer; margin-left: 8px;
+  }
+  header .quick-nav button:hover { background: rgba(255,255,255,0.26); }
+
+  nav.tabs {
+    display: flex;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    overflow-x: auto;
+  }
+  nav.tabs button {
+    background: none; border: none; cursor: pointer;
+    padding: 14px 18px; font-size: 13px; font-weight: bold;
+    color: var(--muted); border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  nav.tabs button.active { color: var(--navy); border-bottom-color: var(--blue); }
+
+  main { max-width: 1000px; margin: 0 auto; padding: 20px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+  }
+  .card h2 { font-size: 15px; color: var(--navy); margin: 0 0 4px 0; }
+  .card .caption { font-size: 12px; color: var(--muted); margin: 0 0 12px 0; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .field { margin-bottom: 4px; }
+  .field label {
+    display: block; font-size: 11px; font-weight: bold; color: var(--navy);
+    text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px;
+  }
+  select, input[type=text], input[type=date], input[type=password] {
+    width: 100%; padding: 10px; font-size: 14px;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: #F8FAFC; font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+  @media (max-width: 640px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .kpi .value { font-size: 24px; font-weight: bold; color: var(--navy); }
+  .kpi .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .kpi.present .value { color: var(--green); }
+  .kpi.absent .value { color: var(--red); }
+  .kpi.leave .value { color: var(--amber); }
+
+  .mark-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .mark-btn {
+    border: 1px solid var(--border); background: #fff; border-radius: 6px;
+    padding: 10px; font-size: 13px; font-weight: bold; cursor: pointer;
+  }
+  .mark-btn.present { color: var(--green); }
+  .mark-btn.absent { color: var(--red); }
+  .mark-btn:hover { background: #F8FAFC; }
+
+  .role-group-title {
+    font-size: 11px; font-weight: bold; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin: 16px 0 6px 0;
+  }
+  .staff-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;
+    background: #fff;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: #EEF1FA;
+    color: var(--blue); font-weight: bold; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .staff-info { flex: 1; min-width: 0; }
+  .staff-name { font-size: 13px; font-weight: bold; }
+  .staff-meta { font-size: 11px; color: var(--muted); }
+  .staff-row select { width: 170px; flex-shrink: 0; }
+
+  button.primary {
+    background: var(--blue); color: #fff; border: none;
+    padding: 13px 20px; border-radius: 6px; font-size: 14px; font-weight: bold;
+    cursor: pointer; width: 100%; margin-top: 6px;
+  }
+  button.primary:hover { background: #245f96; }
+  button.primary:disabled { background: #9CB4CE; cursor: not-allowed; }
+  button.secondary {
+    background: #fff; color: var(--navy); border: 1px solid var(--navy);
+    padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;
+  }
+  button.secondary:hover { background: #F0F4FA; }
+
+  .msg { margin-top: 12px; padding: 10px 12px; border-radius: 6px; font-size: 13px; display: none; }
+  .msg.success { background: #E7F5EC; color: var(--green); border: 1px solid #BFE3CB; }
+  .msg.error { background: #FBEAEA; color: var(--red); border: 1px solid #F1C4C0; }
+
+  .loading, .empty-note { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 0; }
+
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.data-table th { text-align: left; background: var(--navy); color: #fff; padding: 8px 10px; font-size: 11px; }
+  table.data-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+  .badge.present { background: #E7F5EC; color: var(--green); }
+  .badge.absent, .badge.reported { background: #FBEAEA; color: var(--red); }
+  .badge.leave, .badge.sick, .badge.duty { background: #FFF6E5; color: var(--amber); }
+
+  .pin-panel { text-align: center; padding: 40px 0; }
+  .pin-panel input { max-width: 160px; margin: 14px auto; text-align: center; font-size: 22px; letter-spacing: 8px; }
+  .pin-panel button { max-width: 200px; margin: 0 auto; }
+
+  .remove-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+  .remove-btn { background: #fff; color: var(--red); border: 1px solid var(--red); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+  .remove-btn:hover { background: #FBEAEA; }
+
+  .footer-note { text-align: center; font-size: 11px; color: var(--muted); margin: 24px 0; }
+
+  @media print {
+    header, nav.tabs, .no-print { display: none !important; }
+    main { padding: 0; max-width: 100%; }
+    .card { border: none; box-shadow: none; }
+    table.data-table th { background: #1F3864 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">Rumbu Industries Group</div>
+    <div class="headline" id="pageHeadline">Staff Attendance</div>
+  </div>
+  <div class="quick-nav no-print">
+    <button onclick="showTab('report')">Report</button>
+    <button onclick="showTab('staff')">Staff</button>
+  </div>
+</header>
+
+<nav class="tabs no-print">
+  <button id="tabBtnAttendance" class="active" onclick="showTab('attendance')">Attendance</button>
+  <button id="tabBtnReport" onclick="showTab('report')">Print / Report</button>
+  <button id="tabBtnStaff" onclick="showTab('staff')">Staff Mgmt</button>
+</nav>
+
+<main>
+
+  <!-- ============ ATTENDANCE TAB ============ -->
+  <section id="panelAttendance" class="tab-panel active">
+    <div id="attLoading" class="loading">Loading…</div>
+    <div id="attContent" style="display:none;">
+
+      <div class="card">
+        <h2>Where and when</h2>
+        <div class="grid2">
+          <div class="field"><label>Factory</label><select id="attFactory"></select></div>
+          <div class="field"><label>Department</label><select id="attDepartment"></select></div>
+          <div class="field"><label>Unit group</label><select id="attUnitGroup"></select></div>
+          <div class="field" id="attUnitField"><label>Unit</label><select id="attUnit"></select></div>
+          <div class="field"><label>Shift</label><select id="attShift"></select></div>
+          <div class="field"><label>Date</label><input type="date" id="attDate"></div>
+        </div>
+        <div class="field" style="margin-top:10px;">
+          <label>Recorded by</label>
+          <input type="text" id="attRecordedBy" placeholder="Your name">
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="attRosterEmpty" class="empty-note">No staff on the roster for this unit and shift yet. Add them from the Staff Mgmt tab.</div>
+
+        <div id="attRosterBlock" style="display:none;">
+          <div class="kpi-row">
+            <div class="kpi"><div class="value" id="kpiTotal">0</div><div class="label">Total</div></div>
+            <div class="kpi present"><div class="value" id="kpiPresent">0</div><div class="label">Present</div></div>
+            <div class="kpi absent"><div class="value" id="kpiAbsent">0</div><div class="label">Absent</div></div>
+            <div class="kpi leave"><div class="value" id="kpiLeave">0</div><div class="label">On Leave/Duty</div></div>
+          </div>
+
+          <div class="mark-row no-print">
+            <button class="mark-btn present" onclick="markAll('Present')">✓ Mark all present</button>
+            <button class="mark-btn absent" onclick="markAll('Absent')">✗ Mark all absent</button>
+          </div>
+
+          <div id="staffListContainer"></div>
+
+          <button class="primary" id="submitAttBtn" onclick="submitAttendance()">Submit attendance</button>
+          <div id="attSuccessMsg" class="msg success"></div>
+          <div id="attErrorMsg" class="msg error"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ PRINT / REPORT TAB ============ -->
+  <section id="panelReport" class="tab-panel">
+    <div class="card no-print">
+      <h2>Generate attendance report</h2>
+      <div class="grid2">
+        <div class="field"><label>Date</label><input type="date" id="repDate"></div>
+        <div class="field"><label>Factory</label><select id="repFactory"></select></div>
+        <div class="field"><label>Department</label><select id="repDepartment"></select></div>
+        <div class="field"><label>Unit group</label><select id="repUnitGroup"></select></div>
+        <div class="field" id="repUnitField"><label>Unit</label><select id="repUnit"></select></div>
+        <div class="field"><label>Shift</label><select id="repShift"></select></div>
+      </div>
+      <button class="primary" onclick="generateReport()">Generate and print report</button>
+      <div id="repErrorMsg" class="msg error"></div>
+    </div>
+
+    <div id="reportOutput" style="display:none;">
+      <div class="card">
+        <div style="border-bottom:2px solid var(--navy); padding-bottom:10px; margin-bottom:12px;">
+          <div style="font-size:16px; font-weight:bold; color:var(--navy);">RUMBU INDUSTRIES GROUP — Attendance Report</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:4px;" id="repMeta"></div>
+        </div>
+        <div class="kpi-row" id="repSummaryRow"></div>
+      </div>
+      <div class="card">
+        <h2>Records</h2>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Factory</th><th>Dept</th><th>Unit</th><th>Shift</th><th>Staff</th><th>Role</th><th>Status</th></tr></thead>
+          <tbody id="repRecordsBody"></tbody>
+        </table>
+        <button class="secondary no-print" style="margin-top:14px;" onclick="window.print()">🖨️ Print / Save as PDF</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STAFF MGMT TAB ============ -->
+  <section id="panelStaff" class="tab-panel">
+
+    <div id="pinGate" class="card">
+      <div class="pin-panel">
+        <h2>Unit Head Access</h2>
+        <p class="caption">Enter your PIN to manage staff roster</p>
+        <input type="password" id="pinInput" maxlength="4" inputmode="numeric" placeholder="••••">
+        <br>
+        <button class="primary" onclick="unlockStaffMgmt()">Unlock</button>
+        <div id="pinErrorMsg" class="msg error" style="max-width:280px; margin-left:auto; margin-right:auto;"></div>
+      </div>
+    </div>
+
+    <div id="staffMgmtContent" style="display:none;">
+
+      <div class="card">
+        <h2>Add new staff</h2>
+        <p class="caption">Staff added here will appear on their assigned shift roster immediately.</p>
+        <div class="field"><label>Full name</label><input type="text" id="addName" placeholder="e.g. Musa Aliyu"></div>
+        <div class="field"><label>Staff code</label><input type="text" id="addCode" placeholder="e.g. RC999"></div>
+        <div class="field"><label>Role</label><input type="text" id="addRole" list="roleOptions" placeholder="e.g. Operator"></div>
+        <datalist id="roleOptions">
+          <option value="Shift Leader"><option value="Operator"><option value="Mixer">
+          <option value="Inspector"><option value="Technician"><option value="Supervisor">
+        </datalist>
+        <div class="grid2" style="margin-top:6px;">
+          <div class="field"><label>Factory</label><select id="addFactory"></select></div>
+          <div class="field"><label>Department</label><select id="addDepartment"></select></div>
+          <div class="field"><label>Unit group</label><select id="addUnitGroup"></select></div>
+          <div class="field" id="addUnitField"><label>Unit</label><select id="addUnit"></select></div>
+          <div class="field"><label>Shift</label><select id="addShift"></select></div>
+        </div>
+        <button class="primary" onclick="addStaff()">Add to roster</button>
+        <div id="addSuccessMsg" class="msg success"></div>
+        <div id="addErrorMsg" class="msg error"></div>
+      </div>
+
+      <div class="card">
+        <h2>Transfer out / remove staff</h2>
+        <p class="caption">Select a unit and shift to see the roster, then tap Remove next to the staff member who has left.</p>
+        <div class="grid2">
+          <div class="field"><label>Factory</label><select id="rmFactory"></select></div>
+          <div class="field"><label>Department</label><select id="rmDepartment"></select></div>
+          <div class="field"><label>Unit group</label><select id="rmUnitGroup"></select></div>
+          <div class="field" id="rmUnitField"><label>Unit</label><select id="rmUnit"></select></div>
+          <div class="field"><label>Shift</label><select id="rmShift"></select></div>
+        </div>
+        <div id="rmListContainer" style="margin-top:14px;"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="footer-note">Rumbu Industries Group &mdash; internal tool</div>
+</main>
+
+<script src="config.js"></script>
+<script>
+  // -------------------------------------------------------------
+  // API helpers
+  // -------------------------------------------------------------
+  function apiGet(action, params) {
+    var qs = new URLSearchParams(Object.assign({ action: action }, params || {})).toString();
+    return fetch(API_URL + '?' + qs).then(function (r) { return r.json(); });
+  }
+  function apiPost(action, payload) {
+    return fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(Object.assign({ action: action }, payload || {}))
+    }).then(function (r) { return r.json(); });
+  }
+
+  function todayISO() {
+    var d = new Date();
+    var tzOffset = d.getTimezoneOffset() * 60000;
+    return new Date(d - tzOffset).toISOString().slice(0, 10);
+  }
+
+  // -------------------------------------------------------------
+  // Tabs
+  // -------------------------------------------------------------
+  function showTab(name) {
+    ['Attendance', 'Report', 'Staff'].forEach(function (n) {
+      document.getElementById('panel' + n).classList.toggle('active', n.toLowerCase() === name);
+      document.getElementById('tabBtn' + n).classList.toggle('active', n.toLowerCase() === name);
+    });
+  }
+
+  // -------------------------------------------------------------
+  // Org structure + generic cascading selector builder
+  // -------------------------------------------------------------
+  var ORG_UNITS = [];
+  var STATUS_LIST = [];
+
+  function uniq(arr) { return arr.filter(function (v, i) { return arr.indexOf(v) === i; }); }
+
+  function buildCascade(cfg) {
+    var factorySel = document.getElementById(cfg.factory);
+    var deptSel = document.getElementById(cfg.department);
+    var groupSel = document.getElementById(cfg.unitGroup);
+    var unitSel = document.getElementById(cfg.unit);
+    var shiftSel = document.getElementById(cfg.shift);
+    var unitFieldEl = cfg.unitField ? document.getElementById(cfg.unitField) : null;
+
+    function fill(sel, values) {
+      var prevVal = sel.value;
+      sel.innerHTML = '';
+      values.forEach(function (v) {
+        var o = document.createElement('option'); o.value = v; o.textContent = v;
+        sel.appendChild(o);
+      });
+      if (values.indexOf(prevVal) !== -1) sel.value = prevVal;
+    }
+
+    function matching(filters) {
+      return ORG_UNITS.filter(function (u) {
+        return (!filters.factory || u.factory === filters.factory) &&
+          (!filters.department || u.department === filters.department) &&
+          (!filters.unitGroup || u.unitGroup === filters.unitGroup) &&
+          (!filters.unit || u.unit === filters.unit);
+      });
+    }
+
+    function refreshDept() {
+      fill(deptSel, uniq(matching({ factory: factorySel.value }).map(function (u) { return u.department; })));
+      refreshGroup();
+    }
+    function refreshGroup() {
+      fill(groupSel, uniq(matching({ factory: factorySel.value, department: deptSel.value }).map(function (u) { return u.unitGroup; })));
+      refreshUnit();
+    }
+    function refreshUnit() {
+      var matches = matching({ factory: factorySel.value, department: deptSel.value, unitGroup: groupSel.value });
+      var opts = uniq(matches.map(function (u) { return u.unit; }));
+      fill(unitSel, opts);
+      if (unitFieldEl) unitFieldEl.style.display = (opts.length <= 1) ? 'none' : '';
+      refreshShift();
+    }
+    function refreshShift() {
+      var matches = matching({ factory: factorySel.value, department: deptSel.value, unitGroup: groupSel.value, unit: unitSel.value });
+      var shifts = [];
+      matches.forEach(function (m) { m.shifts.forEach(function (s) { if (shifts.indexOf(s) === -1) shifts.push(s); }); });
+      fill(shiftSel, shifts);
+      if (cfg.onChange) cfg.onChange();
+    }
+
+    factorySel.addEventListener('change', refreshDept);
+    deptSel.addEventListener('change', refreshGroup);
+    groupSel.addEventListener('change', refreshUnit);
+    unitSel.addEventListener('change', refreshShift);
+    shiftSel.addEventListener('change', function () { if (cfg.onChange) cfg.onChange(); });
+
+    fill(factorySel, uniq(ORG_UNITS.map(function (u) { return u.factory; })));
+    refreshDept();
+
+    return {
+      getSelection: function () {
+        return {
+          factory: factorySel.value, department: deptSel.value,
+          unitGroup: groupSel.value, unit: unitSel.value, shift: shiftSel.value
+        };
+      }
+    };
+  }
+
+  function initials(name) {
+    return String(name || '').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase();
+  }
+
+  // -------------------------------------------------------------
+  // Attendance tab
+  // -------------------------------------------------------------
+  var attCascade, currentRoster = [];
+
+  function attSelectionComplete() {
+    var s = attCascade.getSelection();
+    return s.factory && s.department && s.unitGroup && s.unit && s.shift;
+  }
+
+  function loadAttendanceRoster() {
+    if (!attSelectionComplete()) return;
+    var sel = attCascade.getSelection();
+    document.getElementById('pageHeadline').textContent =
+      sel.unitGroup === sel.unit ? sel.unitGroup + ' — Attendance' : sel.unitGroup + ' ' + sel.unit + ' — Attendance';
+
+    apiGet('getRoster', sel).then(function (res) {
+      if (!res.ok) { showMsg('attErrorMsg', res.message); return; }
+      currentRoster = res.roster.map(function (r) { return Object.assign({ status: '' }, r); });
+      renderStaffList();
+    }).catch(function (err) { showMsg('attErrorMsg', 'Network error: ' + err.message); });
+  }
+
+  function renderStaffList() {
+    var empty = document.getElementById('attRosterEmpty');
+    var block = document.getElementById('attRosterBlock');
+    if (!currentRoster.length) {
+      empty.style.display = 'block'; block.style.display = 'none'; return;
+    }
+    empty.style.display = 'none'; block.style.display = 'block';
+
+    var groups = {};
+    currentRoster.forEach(function (s) {
+      var role = s.role || 'Staff';
+      if (!groups[role]) groups[role] = [];
+      groups[role].push(s);
+    });
+
+    var container = document.getElementById('staffListContainer');
+    container.innerHTML = '';
+    Object.keys(groups).forEach(function (role) {
+      var title = document.createElement('div');
+      title.className = 'role-group-title';
+      title.textContent = role + (groups[role].length > 1 ? 's' : '');
+      container.appendChild(title);
+
+      groups[role].forEach(function (s) {
+        var row = document.createElement('div');
+        row.className = 'staff-row';
+        row.innerHTML =
+          '<div class="avatar">' + initials(s.staffName) + '</div>' +
+          '<div class="staff-info"><div class="staff-name">' + s.staffName + '</div>' +
+          '<div class="staff-meta">' + s.staffCode + ' · ' + role + '</div></div>' +
+          '<select data-code="' + s.staffCode + '"><option value="">Select status</option>' +
+          STATUS_LIST.map(function (st) { return '<option value="' + st + '"' + (s.status === st ? ' selected' : '') + '>' + st + '</option>'; }).join('') +
+          '</select>';
+        var sel = row.querySelector('select');
+        sel.addEventListener('change', function () {
+          var entry = currentRoster.find(function (r) { return r.staffCode === s.staffCode; });
+          entry.status = sel.value;
+          updateKpis();
+        });
+        container.appendChild(row);
+      });
+    });
+
+    updateKpis();
+  }
+
+  function updateKpis() {
+    var total = currentRoster.length;
+    var present = currentRoster.filter(function (s) { return s.status === 'Present'; }).length;
+    var absent = currentRoster.filter(function (s) { return s.status === 'Absent' || s.status === 'Reported absent'; }).length;
+    var leave = currentRoster.filter(function (s) { return ['Leave', 'Sick leave', 'Official duty'].indexOf(s.status) !== -1; }).length;
+    document.getElementById('kpiTotal').textContent = total;
+    document.getElementById('kpiPresent').textContent = present;
+    document.getElementById('kpiAbsent').textContent = absent;
+    document.getElementById('kpiLeave').textContent = leave;
+  }
+
+  function markAll(status) {
+    currentRoster.forEach(function (s) { s.status = status; });
+    renderStaffList();
+  }
+
+  function showMsg(id, text) {
+    ['attSuccessMsg', 'attErrorMsg'].forEach(function (m) { document.getElementById(m).style.display = 'none'; });
+    var el = document.getElementById(id);
+    el.textContent = text; el.style.display = 'block';
+  }
+
+  function submitAttendance() {
+    if (!currentRoster.length) return;
+    var missing = currentRoster.some(function (s) { return !s.status; });
+    if (missing) { showMsg('attErrorMsg', 'Please select a status for every staff member.'); return; }
+    var recordedBy = document.getElementById('attRecordedBy').value.trim();
+    if (!recordedBy) { showMsg('attErrorMsg', 'Please enter who is recording this attendance.'); return; }
+
+    var sel = attCascade.getSelection();
+    var btn = document.getElementById('submitAttBtn');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+
+    apiPost('submitAttendance', {
+      date: document.getElementById('attDate').value,
+      factory: sel.factory, department: sel.department, unitGroup: sel.unitGroup,
+      unit: sel.unit, shift: sel.shift, recordedBy: recordedBy,
+      entries: currentRoster.map(function (s) { return { staffCode: s.staffCode, staffName: s.staffName, role: s.role, status: s.status }; })
+    }).then(function (res) {
+      btn.disabled = false; btn.textContent = 'Submit attendance';
+      if (res.ok) { showMsg('attSuccessMsg', res.message); }
+      else { showMsg('attErrorMsg', res.message); }
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = 'Submit attendance';
+      showMsg('attErrorMsg', 'Network error: ' + err.message);
+    });
+  }
+
+  // -------------------------------------------------------------
+  // Report tab
+  // -------------------------------------------------------------
+  var repCascade;
+
+  function generateReport() {
+    var sel = repCascade.getSelection();
+    var date = document.getElementById('repDate').value;
+    var errEl = document.getElementById('repErrorMsg');
+    errEl.style.display = 'none';
+
+    var params = { date: date };
+    if (sel.factory) params.factory = sel.factory;
+    if (sel.department) params.department = sel.department;
+    if (sel.unitGroup) params.unitGroup = sel.unitGroup;
+    if (sel.unit) params.unit = sel.unit;
+    if (sel.shift) params.shift = sel.shift;
+
+    apiGet('getAttendanceReport', params).then(function (res) {
+      if (!res.ok) { errEl.textContent = res.message; errEl.style.display = 'block'; return; }
+      renderReport(res, sel, date);
+    }).catch(function (err) {
+      errEl.textContent = 'Network error: ' + err.message; errEl.style.display = 'block';
+    });
+  }
+
+  function renderReport(data, sel, date) {
+    var bits = [];
+    bits.push('Date: ' + (date || 'All'));
+    if (sel.factory) bits.push('Factory: ' + sel.factory);
+    if (sel.department) bits.push('Department: ' + sel.department);
+    if (sel.unitGroup) bits.push('Unit: ' + sel.unitGroup + (sel.unit && sel.unit !== sel.unitGroup ? ' ' + sel.unit : ''));
+    if (sel.shift) bits.push('Shift: ' + sel.shift);
+    document.getElementById('repMeta').textContent = bits.join(' · ') + ' · Generated ' + data.generatedAt + ' · ' + data.totalRecords + ' record(s)';
+
+    var summaryRow = document.getElementById('repSummaryRow');
+    summaryRow.innerHTML = '';
+    Object.keys(data.summary).forEach(function (k) {
+      var d = document.createElement('div');
+      d.className = 'kpi';
+      d.innerHTML = '<div class="value">' + data.summary[k] + '</div><div class="label">' + k + '</div>';
+      summaryRow.appendChild(d);
+    });
+
+    var body = document.getElementById('repRecordsBody');
+    body.innerHTML = '';
+    if (!data.records.length) {
+      body.innerHTML = '<tr><td colspan="8" class="empty-note">No records match these filters.</td></tr>';
+    } else {
+      data.records.forEach(function (r) {
+        var tr = document.createElement('tr');
+        var unitLabel = r.unitGroup === r.unit ? r.unit : r.unitGroup + ' ' + r.unit;
+        tr.innerHTML =
+          '<td>' + r.date + '</td><td>' + r.factory + '</td><td>' + r.department + '</td>' +
+          '<td>' + unitLabel + '</td><td>' + r.shift + '</td>' +
+          '<td>' + r.staffName + ' (' + r.staffCode + ')</td><td>' + r.role + '</td>' +
+          '<td><span class="badge ' + r.status.toLowerCase().replace(/\s+/g, '') + '">' + r.status + '</span></td>';
+        body.appendChild(tr);
+      });
+    }
+
+    document.getElementById('reportOutput').style.display = 'block';
+  }
+
+  // -------------------------------------------------------------
+  // Staff Mgmt tab
+  // -------------------------------------------------------------
+  var addCascade, rmCascade;
+
+  function unlockStaffMgmt() {
+    var pin = document.getElementById('pinInput').value;
+    apiPost('verifyPin', { pin: pin }).then(function (res) {
+      var err = document.getElementById('pinErrorMsg');
+      if (res.ok) {
+        document.getElementById('pinGate').style.display = 'none';
+        document.getElementById('staffMgmtContent').style.display = 'block';
+      } else {
+        err.textContent = res.message; err.style.display = 'block';
+      }
+    }).catch(function (e) {
+      var err = document.getElementById('pinErrorMsg');
+      err.textContent = 'Network error: ' + e.message; err.style.display = 'block';
+    });
+  }
+
+  function addStaff() {
+    var name = document.getElementById('addName').value.trim();
+    var code = document.getElementById('addCode').value.trim();
+    var role = document.getElementById('addRole').value.trim();
+    var sel = addCascade.getSelection();
+    var errEl = document.getElementById('addErrorMsg');
+    var okEl = document.getElementById('addSuccessMsg');
+    okEl.style.display = 'none'; errEl.style.display = 'none';
+
+    if (!name || !code) { errEl.textContent = 'Full name and staff code are required.'; errEl.style.display = 'block'; return; }
+
+    apiPost('addStaff', {
+      staffName: name, staffCode: code, role: role,
+      factory: sel.factory, department: sel.department, unitGroup: sel.unitGroup, unit: sel.unit, shift: sel.shift
+    }).then(function (res) {
+      if (res.ok) {
+        okEl.textContent = res.message; okEl.style.display = 'block';
+        document.getElementById('addName').value = '';
+        document.getElementById('addCode').value = '';
+        document.getElementById('addRole').value = '';
+      } else {
+        errEl.textContent = res.message; errEl.style.display = 'block';
+      }
+    }).catch(function (e) { errEl.textContent = 'Network error: ' + e.message; errEl.style.display = 'block'; });
+  }
+
+  function loadRemoveList() {
+    var sel = rmCascade.getSelection();
+    if (!sel.factory || !sel.department || !sel.unitGroup || !sel.unit || !sel.shift) return;
+    apiGet('getRoster', sel).then(function (res) {
+      var container = document.getElementById('rmListContainer');
+      container.innerHTML = '';
+      if (!res.ok) { container.innerHTML = '<div class="empty-note">' + res.message + '</div>'; return; }
+      if (!res.roster.length) { container.innerHTML = '<div class="empty-note">No staff on this roster yet.</div>'; return; }
+      res.roster.forEach(function (s) {
+        var row = document.createElement('div');
+        row.className = 'remove-row';
+        row.innerHTML =
+          '<div><div class="staff-name">' + s.staffName + '</div><div class="staff-meta">' + s.staffCode + ' · ' + s.role + '</div></div>' +
+          '<button class="remove-btn">Remove</button>';
+        row.querySelector('button').addEventListener('click', function () {
+          if (!confirm('Remove ' + s.staffName + ' from this roster?')) return;
+          apiPost('removeStaff', { staffCode: s.staffCode }).then(function (r) {
+            if (r.ok) loadRemoveList(); else alert(r.message);
+          });
+        });
+        container.appendChild(row);
+      });
+    });
+  }
+
+  // -------------------------------------------------------------
+  // Startup
+  // -------------------------------------------------------------
+  function init() {
+    if (!API_URL || API_URL.indexOf('PASTE_YOUR') !== -1) {
+      document.getElementById('attLoading').innerHTML =
+        '<strong style="color:#C0392B;">Setup needed:</strong> open config.js and paste your deployed Apps Script Web App URL into API_URL.';
+      return;
+    }
+
+    apiGet('getOrgStructure', {}).then(function (res) {
+      if (!res.ok) {
+        document.getElementById('attLoading').textContent = 'Failed to load: ' + res.message;
+        return;
+      }
+      ORG_UNITS = res.units;
+      STATUS_LIST = res.statusList;
+
+      attCascade = buildCascade({
+        factory: 'attFactory', department: 'attDepartment', unitGroup: 'attUnitGroup',
+        unit: 'attUnit', shift: 'attShift', unitField: 'attUnitField',
+        onChange: loadAttendanceRoster
+      });
+      repCascade = buildCascade({
+        factory: 'repFactory', department: 'repDepartment', unitGroup: 'repUnitGroup',
+        unit: 'repUnit', shift: 'repShift', unitField: 'repUnitField'
+      });
+      addCascade = buildCascade({
+        factory: 'addFactory', department: 'addDepartment', unitGroup: 'addUnitGroup',
+        unit: 'addUnit', shift: 'addShift', unitField: 'addUnitField'
+      });
+      rmCascade = buildCascade({
+        factory: 'rmFactory', department: 'rmDepartment', unitGroup: 'rmUnitGroup',
+        unit: 'rmUnit', shift: 'rmShift', unitField: 'rmUnitField',
+        onChange: loadRemoveList
+      });
+
+      document.getElementById('attDate').value = todayISO();
+      document.getElementById('repDate').value = todayISO();
+
+      document.getElementById('attLoading').style.display = 'none';
+      document.getElementById('attContent').style.display = 'block';
+
+      loadAttendanceRoster();
+      loadRemoveList();
+    }).catch(function (err) {
+      document.getElementById('attLoading').innerHTML =
+        '<strong style="color:#C0392B;">Failed to reach the API:</strong><br>' + err.message +
+        '<br><br><span style="font-size:11px;">Check that API_URL in config.js is correct and the backend is deployed with "Anyone" access.</span>';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
